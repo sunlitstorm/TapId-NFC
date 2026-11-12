@@ -1,0 +1,196 @@
+{
+  "app_name": "TapID",
+  "personality": "1 iOS-Native Clean",
+  "personality_one_liner": "A highly functional, trust-inspiring university credential platform that prioritizes instant access and operational clarity.",
+  "color": {
+    "surface": "#FFFFFF",
+    "onSurface": "#0A0D14",
+    "surfaceSecondary": "#F5F7FA",
+    "onSurfaceSecondary": "#3E4C5F",
+    "surfaceTertiary": "#EAEFF5",
+    "onSurfaceTertiary": "#2C394B",
+    "surfaceInverse": "#0B1829",
+    "onSurfaceInverse": "#FFFFFF",
+    "brand": "#00204A",
+    "brandPrimary": "#00204A",
+    "onBrandPrimary": "#FFFFFF",
+    "brandSecondary": "#E0EBFF",
+    "onBrandSecondary": "#00204A",
+    "brandTertiary": "#1A365D",
+    "onBrandTertiary": "#FFFFFF",
+    "success": "#0B7A44",
+    "onSuccess": "#FFFFFF",
+    "warning": "#B54708",
+    "onWarning": "#FFFFFF",
+    "error": "#B42318",
+    "onError": "#FFFFFF",
+    "info": "#026AA2",
+    "onInfo": "#FFFFFF",
+    "border": "#E4E7EC",
+    "borderStrong": "#D0D5DD",
+    "divider": "#EAECF0",
+    "muted": "#667085",
+    "onBrand": "#FFFFFF"
+  },
+  "typography": {
+    "displayFontFamily": "Plus Jakarta Sans",
+    "textFontFamily": "Geist",
+    "scale": {
+      "sm": 12,
+      "base": 14,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24
+    }
+  },
+  "spacing": {
+    "rule": "Generous vertical breathing room for ID elements; tight grouping for history logs and analytics.",
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 6,
+    "md": 12,
+    "lg": 20,
+    "pill": 999
+  },
+  "shadow_tier": 1,
+  "navigation": "bottom_tabs",
+  "icon_set": "Phosphor",
+  "glassmorphism": {
+    "enabled": true,
+    "do's": [
+      "Use on the digital ID card overlay for liveness depth",
+      "Sticky header backgrounds when logs scroll",
+      "Bottom tab bar"
+    ],
+    "dont's": [
+      "Do not use on dense admin tables or log lists"
+    ]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "expo-glass-effect",
+      "android": "expo-blur",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "screens": [
+    {
+      "name": "Login",
+      "purpose": "Secure authentication into the student or admin portal.",
+      "states": {
+        "loading": "Centered spinner",
+        "empty": "N/A",
+        "error": "Toast or inline alert indicating invalid credentials"
+      },
+      "layout": "Centered form with university logo/text at top, student/admin toggle, email/password inputs, and a sticky login button. Subtle blurred building image background with a gradient scrim."
+    },
+    {
+      "name": "DigitalID",
+      "purpose": "Primary student view for campus access via NFC tap or QR code.",
+      "states": {
+        "loading": "Skeleton of the ID card",
+        "empty": "Illustration indicating missing enrollment data with contact admin CTA",
+        "error": "Error card with a retry button to fetch ID credentials"
+      },
+      "layout": "Bento box style or focused centered layout. Hero section is the digital card with student photo, name, ID number, and a subtle shifting gradient (liveness indicator). Large 'Tap to Enter' (NFC) primary action button below, and a secondary action to 'Show QR Code'."
+    },
+    {
+      "name": "NFCVerificationScreen",
+      "purpose": "Simulated reader screen that shows the result of an NFC tap.",
+      "states": {
+        "loading": "Pulsing NFC icon awaiting simulated tap",
+        "empty": "N/A",
+        "error": "Access Denied screen (red/error styling) with brief reason (e.g., Not enrolled)"
+      },
+      "layout": "Full-screen modal. Default state is 'Ready to Tap'. Upon tap action, transitions to large Success (Green check) or Denied (Red cross) icon with building name and timestamp."
+    },
+    {
+      "name": "History",
+      "purpose": "Log of recent campus access attempts for the student.",
+      "states": {
+        "loading": "List skeletons",
+        "empty": "Illustration of empty corridor and 'No access history yet.'",
+        "error": "Alert to retry loading history"
+      },
+      "layout": "Sticky header. Flat list of access records showing building name, timestamp, and status (granted/denied). Grouped by date."
+    },
+    {
+      "name": "Profile",
+      "purpose": "Student settings and credential revocation (lost device).",
+      "states": {
+        "loading": "Skeleton profile details",
+        "empty": "N/A",
+        "error": "Error fetching profile"
+      },
+      "layout": "Profile header with avatar. List of actions: Revoke ID (Danger action), Enrollment status, App Settings, Logout."
+    },
+    {
+      "name": "AdminDashboard",
+      "purpose": "High-level overview of campus access analytics and alerts.",
+      "states": {
+        "loading": "Skeletons for charts",
+        "empty": "No data available",
+        "error": "Retry loading metrics"
+      },
+      "layout": "Analytics charts (e.g., building usage over time), recent critical denied access alerts. Card-based metric summaries."
+    },
+    {
+      "name": "AdminStudents",
+      "purpose": "Manage student credentials and permissions.",
+      "states": {
+        "loading": "List skeletons",
+        "empty": "No students found matching search",
+        "error": "Retry fetching students"
+      },
+      "layout": "Sticky search bar and filter chips. List of students. Tapping a student opens a bottom sheet to Issue/Revoke digital ID and manage building permissions."
+    }
+  ],
+  "images": {
+    "login_background": {
+      "url": "https://images.unsplash.com/photo-1487958449943-2429e8be8625?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTJ8MHwxfHNlYXJjaHwxfHx1bml2ZXJzaXR5JTIwYnVpbGRpbmclMjBtb2Rlcm4lMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzk0NDc0MTc2fDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Modern university building facade used as abstract background"
+    },
+    "student_avatar": {
+      "url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzB8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBzdHVkZW50JTIwaGVhZHNob3QlMjBwb3J0cmFpdHxlbnwwfHx8fDE3OTQ0NzQxNzZ8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Professional student headshot"
+    },
+    "nfc_icon": {
+      "url": "https://images.unsplash.com/photo-1626682561863-fdbb965de0dc?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDF8MHwxfHNlYXJjaHwxfHxORkMlMjB0YXAlMjBpY29ufGVufDB8fHx8MTc5NDQ3NDE3Nnww&ixlib=rb-4.1.0&q=85",
+      "alt": "NFC Tap visualization"
+    },
+    "empty_history": {
+      "url": "https://images.unsplash.com/photo-1745271968703-3c8411cae2f5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NjV8MHwxfHNlYXJjaHwxfHxlbXB0eSUyMHVuaXZlcnNpdHklMjBjb3JyaWRvciUyMG1pbmltYWx8ZW58MHx8fHwxNzk0NDc0MTgwfDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Empty minimal university corridor for no history state"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Use Phosphor icons consistently across the app. Do not use emoji in the UI.",
+    "For the digital ID card liveness indicator, use react-native-reanimated to create a subtle shifting gradient behind the card data, or a subtle pulsing border.",
+    "Implement a bottom sheet (@gorhom/bottom-sheet) for QR code fallback display and admin issuance/revocation tasks to maintain context without full screen switches.",
+    "The login background must have a vertical top-to-bottom gradient scrim (transparent to surfaceInverse) so that the login form remains perfectly legible.",
+    "Admin and Student roles should be cleanly separated in logic, but present a unified design language built on the Navy, White, and Light Grey palette.",
+    "For the simulated NFC reader, ensure the transition between 'Ready', 'Processing', and 'Granted/Denied' feels native and responsive with haptic feedback.",
+    "Use standard spacing rhythms (e.g., lg for container padding, md for gaps) and ensure touch targets are at least 44x44pt.",
+    "Ensure Loading, Empty, and Error states are properly implemented for data-fetching screens."
+  ],
+  "haptics": {
+    "login_submit": "impactMedium",
+    "nfc_tap_simulate": "impactHeavy",
+    "nfc_success": "notificationSuccess",
+    "nfc_error": "notificationError",
+    "toggle_qr": "selection",
+    "revoke_id": "impactHeavy"
+  }
+}

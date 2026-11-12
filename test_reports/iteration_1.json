@@ -1,0 +1,54 @@
+{
+  "summary": "First full test of TapID (backend + Expo web preview at 375x667). Backend: 38/38 pytest pass (20 existing + 18 new tests against the public URL) covering auth, RBAC 401/403, 422 validation, issuance rules (needs active enrollment, only one active credential), replay_detected, credential_revoked, not_enrolled, no_permission, invalid_token, the reader /api/verify X-Reader-Key check, the admin reader simulate/verify, log filters, student search/filter, analytics, photo upload and download (object storage works, owner 200 / other student 403 / anonymous 401), and building duplicate checks. Frontend: every requested flow works end to end: demo login, ID card, tap LIB granted / SCI denied, QR sheet with countdown, History, Profile, lost-device revoke, register -> pending card, admin overview charts, students search and filters, student detail (enrollment chips, issue, revoke, permission switches + save), Reader simulate + replay blocked, Logs filters and search, Buildings add sheet with duplicate error, photo upload through the web file chooser. One bug found and fixed: duplicate React key in the overview daily chart, which raised a LogBox console error that covered the admin tab bar. One deprecated import found: expo-router/unstable-native-tabs. No other deprecated packages (expo-av, expo-barcode-scanner, expo-background-fetch) are used. The demo student student@tapid.edu still has active credential TID-5588BD245CE6 and access to LIB/ENG/REC.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/files/students/{id}/photo", "issue": "The session JWT is accepted as a query parameter (get_principal_header_or_query). This leaks the long-lived session token into URLs, proxy logs and caches. Consider short-lived signed photo URLs or a separate photo token."},
+      {"endpoint": "GET /api/admin/analytics", "issue": "Loads up to 50k log docs into memory and groups them in Python. Use a Mongo $group aggregation. 'Today' uses UTC day boundaries, not campus local time."},
+      {"endpoint": "verification REASON_MESSAGES['granted']", "issue": "The granted message is 'Access granted', the same as the result title, so the UI shows 'Access granted / Access granted'. Use a more useful message, e.g. 'Welcome - door unlocked'."},
+      {"endpoint": "admin students/buildings", "issue": "There is no delete or edit endpoint for buildings or students. Admins cannot fix typos, and test data cannot be cleaned up."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "src/components/charts.tsx StackedBars", "issue": "FIXED: key={d.label} used narrow weekday labels (S,S,T,T), which raised a duplicate-key console error. On web the LogBox error toast covered the admin tab bar and blocked taps on tabs. Changed the key to index+label.", "testID": "daily-chart", "priority": "HIGH (fixed)"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Student ID tab (digital-id-card)", "issues": ["At 375px the credential UID (TID-XXXXXXXXXXXX) overflows the card's inner padding to the card edge. Fix: flexShrink + numberOfLines/adjustsFontSizeToFit, or put the meta row on two lines. Ref: src/components/digital-id-card.tsx:74"]},
+      {"screen": "Tap sheet result", "issues": ["The 'Tap another door' secondary button label wraps onto two lines and is left-aligned. Shorten the label or center it with a single line."]},
+      {"screen": "Admin student detail", "issues": ["The header email wraps mid-word ('...@tapid.ed' / 'u'). The Active badge squeezes the name column. Consider putting the badge under the name, and numberOfLines=1 with ellipsizeMode on the email."]},
+      {"screen": "Chips (student-filter-*, logs-result-*, logs-building-*, revoke-reason-*, enrollment-status-*)", "issues": ["Chip height is about 36px, below the 44pt touch-target minimum."]},
+      {"screen": "Profile", "issues": ["The enrollment badge is left-aligned while the rest of the profile card is centered."]},
+      {"screen": "Admin revoke", "issues": ["revoke-credential-button revokes on a single tap with no confirmation. The student-side revoke has a confirm sheet; add the same for admin."]}
+    ],
+    "react_native_issues": [
+      {"component": "expo-router/unstable-native-tabs", "issue": "Deprecated import. The console warns: '`expo-router/unstable-native-tabs` is deprecated. Use `expo-router/native-tabs` instead.' Reference: /app/frontend/app/student/_layout.tsx:2 and /app/frontend/app/admin/_layout.tsx:2"}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_tapid_public_api.py", "/app/backend/tests/test_api_integration.py", "/app/backend/tests/test_tap_tokens.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Change the NativeTabs import from 'expo-router/unstable-native-tabs' to 'expo-router/native-tabs' in app/student/_layout.tsx and app/admin/_layout.tsx.",
+    "Fix the credential UID overflow on the digital ID card at 375px width.",
+    "Add a confirmation sheet before the admin revokes a credential (revoke-credential-button).",
+    "Raise chip touch targets to at least 44pt (minHeight 44 or hitSlop).",
+    "Improve the 'granted' reason message so it does not repeat the title; fix the 'Tap another door' button wrapping.",
+    "Overview recent-denied rows reuse the log-row-{id} testIDs from the Logs tab. Give them a different prefix (e.g. overview-log-row-) to avoid duplicate testIDs.",
+    "Reader building chips use Mongo ids in testIDs (reader-building-<id>). Use the building code for consistency (reader-building-LIB).",
+    "tests/test_api_integration.py creates students named 'Test Student' (no TEST_ prefix) with active credentials and never cleans up. They now fill the admin pending list (12 pending) and the reader credential list. Prefix with TEST_ and add cleanup, or a delete endpoint.",
+    "Optional: replace session-token-in-query for photos with signed short-lived URLs; move analytics to a Mongo aggregation."
+  ],
+  "critical_code_review_comments": [
+    "The verification pipeline is solid: nonce single-use through a unique-index insert, a domain-separated tap-token key, every attempt logged, and the cross-student token is rejected with 403 on /api/me/simulated-tap.",
+    "The nonce is consumed before the building check, so a tap at a wrong or missing building burns the token. This is acceptable, but worth documenting.",
+    "Students and logs lists have no pagination (limit 100/200).",
+    "CORS allow_origins=['*'] is fine for preview but should be restricted for production."
+  ],
+  "updated_files": ["/app/frontend/src/components/charts.tsx (unique key fix)", "/app/backend/tests/test_tapid_public_api.py (new)"],
+  "success_rate": {"backend": "100% (38/38)", "frontend": "100% of requested flows functional after the chart key fix; design issues listed"},
+  "seed_data_creation": "Created and could not delete (no delete endpoints): API-test students 'TEST_ Student <sfx>' (test_<sfx>@tapid.edu, 2 runs, credentials revoked); UI student 'TEST_ UI 08ea8d' (test_ui_08ea8d@tapid.edu / Password!1, active enrollment, credentials revoked, LIB permission, photo uploaded); building 'TEST_ Hall TS460' (code TS460); plus verification log entries. Demo data was not modified apart from new access-log entries for student@tapid.edu (taps at LIB/SCI and an admin reader simulate/replay).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run the backend with: cd /app/backend && python -m pytest tests -q (pytest.ini forces -n 2 --dist loadscope; for serial runs use -n 0, not -p no:xdist). The public URL comes from frontend/.env EXPO_PUBLIC_BACKEND_URL (there is no EXPO_BACKEND_URL key). On web the tab testIDs are tab-student-id/history/profile and tab-admin-overview/students/reader/logs. Photo upload works on web through page.expect_file_chooser on change-photo-button. Overview recent-denied rows share the log-row- prefix, so count log rows only within logs-list.",
+  "rca_of_issue": "Admin overview console error 'Encountered two children with the same key, T': StackedBars used the narrow weekday label as the React key, and 7 days contain repeated letters (S/S, T/T). Fixed by keying on index+label. Verified: no console errors on the overview, and the admin tab bar is no longer covered by the LogBox toast."
+}
